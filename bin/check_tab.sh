@@ -1,50 +1,81 @@
-#! /bin/bash -e
+#! /usr/bin/env bash
+set -e -u
+# !! EDITS TO THIS FILE ARE LOST DURING UPDATES BY xrst.git/bin/dev_tools.sh !!
+# SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-or-later
+# SPDX-FileCopyrightText: Bradley M. Bell <bradbell@seanet.com>
+# SPDX-FileContributor: 2020-25 Bradley M. Bell
 # -----------------------------------------------------------------------------
-# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-21 Bradley M. Bell
-#
-# CppAD is distributed under the terms of the
-#              Eclipse Public License Version 2.0.
-#
-# This Source Code may also be made available under the following
-# Secondary License when the conditions for such availability set forth
-# in the Eclipse Public License, Version 2.0 are satisfied:
-#       GNU General Public License, Version 2.0 or later.
+# bin/check_tabls.h
+# Checks for tabs in the source and returns an error if it finds any.
+# Files that are not checked can be specified in bin/dev_settings.sh.
 # -----------------------------------------------------------------------------
-if [  "$0" != 'bin/check_tab.sh' ]
+if [ "$0" != "bin/check_tab.sh" ]
 then
-    echo "bin/check_tab.sh: must be executed from its parent directory"
-    exit 1
+   echo "bin/check_tab.sh: must be executed from its parent directory"
+   exit 1
 fi
-echo "-------------------------------------------------------"
+if [ "$#" == 0 ]
+then
+   all='false'
+elif [ "$#" == 1 ] && [ "$1" == 'all' ]
+then
+   all='true'
+else
+   echo 'usage: bin/check_tab [all]'
+   exit 1
+fi
+#
+# sed
+source bin/grep_and_sed.sh
+#
+# invisible_and_tab_ok
+source bin/dev_settings.sh
+# ----------------------------------------------------------------------------
+#
+# sed.$$
+cat << EOF > sed.$$
+s|.*-> *||
+EOF
+for name in $invisible_and_tab_ok
+do
+   if [ -f $name ]
+   then
+      echo "^$name\$" | $sed -e 's|/|[/]|g' -e 's|.*|/&/d|' >> sed.$$
+   elif [ -d $name ]
+   then
+      echo "^$name/" | $sed -e 's|/|[/]|g' -e 's|.*|/&/d|' >> sed.$$
+   else
+      echo "$name in no_copyright_list is not a file or directory"
+      exit 1
+   fi
+done
+#
+# file_list
+if [ "$all" == 'true' ]
+then
+   file_list=$(git ls-files | $sed -f sed.$$)
+else
+   file_list=$(git status --porcelain | \
+      $sed -e '/^D/d' -e 's|^...||' | $sed -f sed.$$)
+fi
+#
+# ok
 ok='yes'
-file_list=`git ls-files | sed \
-    -e '/makefile[.]am$/d' \
-    -e '/makefile[.]in$/d' \
-    -e '/^batch_edit.sed$/d' \
-    -e '/^coin.png$/d' \
-    -e '/^ar-lib$/d' \
-    -e '/^configure$/d' \
-    -e '/^compile$/d' \
-    -e '/^config.guess$/d' \
-    -e '/^config.sub$/d' \
-    -e '/^depcomp$/d' \
-    -e '/^install-sh$/d' \
-    -e '/^uw_copy_040507.html/d' \
-`
-tab=$'\t'
 for file in $file_list
 do
-    if grep $'\t' $file > /dev/null
-    then
-        echo $file
-        ok='no'
-    fi
+   if $grep -P '\t' $file > /dev/null
+   then
+      echo "$file has a tab"
+      ok='no'
+   fi
 done
-echo "-------------------------------------------------------"
-if [ "$ok" = 'no' ]
+if [ "$ok" != 'yes' ]
 then
-    echo 'bin/check_tab.sh: The files above contain tabs'
-    exit 1
+   echo 'check_tab: Error'
+   rm sed.$$
+   exit 1
 fi
-echo 'bin/check_if.sh: OK'
+# -----------------------------------------------------------------------------
+rm sed.$$
+echo 'check_tab.sh: OK'
 exit 0

@@ -1,19 +1,16 @@
-# -----------------------------------------------------------------------------
-# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-20 Bradley M. Bell
-#
-# CppAD is distributed under the terms of the
-#              Eclipse Public License Version 2.0.
-#
-# This Source Code may also be made available under the following
-# Secondary License when the conditions for such availability set forth
-# in the Eclipse Public License, Version 2.0 are satisfied:
-#       GNU General Public License, Version 2.0 or later.
-# -----------------------------------------------------------------------------
+# SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-or-later
+# SPDX-FileCopyrightText: Bradley M. Bell <bradbell@seanet.com>
+# SPDX-FileContributor: 2003-23 Bradley M. Bell
+# ----------------------------------------------------------------------------
 # Build the speed/sacado directory tests
 # Inherit build type from ../CMakeList.txt
 
 # assert sacado_prefix is defined
 assert( sacado_prefix )
+
+# Avoid the following warning:
+# The installed Kokkos configuration does not support CXX extensions.
+SET(CMAKE_CXX_EXTENSIONS Off)
 
 # Adds flags to the compiler command line for sources in the current directory
 # and below. This command can be used to add any flags, but it was originally
@@ -27,50 +24,39 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/../src )
 #                 source1 source2 ... sourceN
 # )
 SET(source_list ../main.cpp
-    det_lu.cpp
-    det_minor.cpp
-    mat_mul.cpp
-    ode.cpp
-    poly.cpp
-    sparse_hessian.cpp
-    sparse_jacobian.cpp
+   det_lu.cpp
+   det_minor.cpp
+   mat_mul.cpp
+   ode.cpp
+   poly.cpp
+   sparse_hessian.cpp
+   sparse_jacobian.cpp
 )
 set_compile_flags( speed_sacado "${cppad_debug_which}" "${source_list}" )
 #
 ADD_EXECUTABLE( speed_sacado EXCLUDE_FROM_ALL ${source_list} )
-
-# determine libraries necessary to link Sacado
-SET(config_file "${sacado_prefix}/include/Makefile.export.Sacado")
-IF(NOT EXISTS ${config_file})
-    MESSAGE(FATAL_ERROR
-"the file sacado_prefix/include/Makefile.export.Sacado does not exist
-where sacado_prefix=${sacado_prefix}"
-    )
-ENDIF(NOT EXISTS ${config_file})
-SET(cmd "grep" "Sacado_LIBRARIES=" "${config_file}")
-EXECUTE_PROCESS(
-    COMMAND         ${cmd}
-    OUTPUT_VARIABLE temp1
+#
+# List of libraries to be linked into the specified target
+TARGET_LINK_LIBRARIES(speed_sacado
+   ${cppad_lib}
+   ${colpack_libs}
 )
-STRING(REGEX REPLACE "Sacado_LIBRARIES= *-l" "" temp2  ${temp1})
-STRING(STRIP ${temp2} temp3)
-STRING(REGEX REPLACE " *-l" ";" sacado_lib_list ${temp3})
+# determine libraries necessary to link Sacado
+FOREACH(dir ${cmake_install_libdirs})
+   IF( IS_DIRECTORY ${sacado_prefix}/${dir}/cmake/Trilinos )
+      SET(Trilinos_DIR "${sacado_prefix}/${dir}/cmake/Trilinos" )
+   ENDIF( IS_DIRECTORY ${sacado_prefix}/${dir}/cmake/Trilinos )
+ENDFOREACH( dir )
+FIND_PACKAGE(Trilinos CONFIG)
+print_variable(Sacado_LIBRARIES)
 #
 # include the dl library if it is in the system path
 CHECK_LIBRARY_EXISTS( dl dlopen "${CMAKE_SYSTEM_LIBRARY_PATH}" dl_found )
 IF( dl_found )
-    TARGET_LINK_LIBRARIES(speed_sacado speed_src ${sacado_lib_list} dl)
+   TARGET_LINK_LIBRARIES( speed_sacado speed_src ${Sacado_LIBRARIES} dl )
 ELSE( dl_found )
-    TARGET_LINK_LIBRARIES(speed_sacado speed_src ${sacado_lib_list})
+   TARGET_LINK_LIBRARIES( speed_sacado speed_src ${Sacado_LIBRARIES} )
 ENDIF( dl_found )
 #
-# Add the check_speed_sacado target
-ADD_CUSTOM_TARGET(check_speed_sacado
-    speed_sacado correct 54321
-    DEPENDS speed_sacado speed_src
-)
-MESSAGE(STATUS "make check_speed_sacado: available")
-
-# Change check depends in parent environment
-add_to_list(check_speed_depends check_speed_sacado)
-SET(check_speed_depends "${check_speed_depends}" PARENT_SCOPE)
+# the check_speed_sacado
+add_check_executable(check_speed sacado "correct 54321")

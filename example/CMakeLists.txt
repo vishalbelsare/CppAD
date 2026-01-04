@@ -1,67 +1,48 @@
-# -----------------------------------------------------------------------------
-# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-22 Bradley M. Bell
-#
-# CppAD is distributed under the terms of the
-#              Eclipse Public License Version 2.0.
-#
-# This Source Code may also be made available under the following
-# Secondary License when the conditions for such availability set forth
-# in the Eclipse Public License, Version 2.0 are satisfied:
-#       GNU General Public License, Version 2.0 or later.
-# -----------------------------------------------------------------------------
+# SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-or-later
+# SPDX-FileCopyrightText: Bradley M. Bell <bradbell@seanet.com>
+# SPDX-FileContributor: 2003-25 Bradley M. Bell
+# ----------------------------------------------------------------------------
 # Build the example directory tests
 # Inherit environment from ../CMakeList.txt
 
 # initialize check_example_depends
 SET(check_example_depends "")
-
-# abs_normal examples
+#
+# BEGIN_SORT_THIS_LINE_PLUS_1
 ADD_SUBDIRECTORY(abs_normal)
-
-# atomic examples
-ADD_SUBDIRECTORY(atomic_two)
-ADD_SUBDIRECTORY(atomic_three)
 ADD_SUBDIRECTORY(atomic_four)
-
-# checkpoint exmaples
+ADD_SUBDIRECTORY(atomic_three)
+ADD_SUBDIRECTORY(atomic_two)
 ADD_SUBDIRECTORY(chkpoint_two)
-
-# code_gen_fun examples
-IF( cpapd_has_cpapdcg )
-    ADD_SUBDIRECTORY(code_gen_fun)
-ENDIF( cpapd_has_cpapdcg )
-
-# graph examples
-ADD_SUBDIRECTORY(graph)
-
-# general examples
+ADD_SUBDIRECTORY(compare_change)
 ADD_SUBDIRECTORY(general)
-
-# get_started
 ADD_SUBDIRECTORY(get_started)
-
+ADD_SUBDIRECTORY(graph)
+ADD_SUBDIRECTORY(json)
+ADD_SUBDIRECTORY(multi_thread)
+ADD_SUBDIRECTORY(optimize)
+ADD_SUBDIRECTORY(print_for)
+ADD_SUBDIRECTORY(sparse)
+ADD_SUBDIRECTORY(utility)
+ADD_SUBDIRECTORY(valvector)
+# END_SORT_THIS_LINE_MINUS_1
+#
+# cppad_code_gen examples
+IF( cppad_has_cppadcg )
+   ADD_SUBDIRECTORY(cppad_code_gen)
+ENDIF( cppad_has_cppadcg )
+#
 # ipopt_solve examples
 IF( cppad_has_ipopt)
-    ADD_SUBDIRECTORY(ipopt_solve)
+   ADD_SUBDIRECTORY(ipopt_solve)
 ENDIF( cppad_has_ipopt)
+#
+# jit examples
+IF( NOT cppad_link_flags_has_m32 )
+   ADD_SUBDIRECTORY(jit)
+ENDIF( )
 
-# Json AD graph examples
-ADD_SUBDIRECTORY(json)
 
-# multi_thread examples
-ADD_SUBDIRECTORY(multi_thread)
-
-# optimize examples
-ADD_SUBDIRECTORY(optimize)
-
-# print_for example
-ADD_SUBDIRECTORY(print_for)
-
-# sparse examples
-ADD_SUBDIRECTORY(sparse)
-
-# utility examples
-ADD_SUBDIRECTORY(utility)
 
 # Add the check_example target
 ADD_CUSTOM_TARGET(check_example "" DEPENDS ${check_example_depends})

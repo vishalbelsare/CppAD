@@ -1,59 +1,103 @@
 # ifndef CPPAD_CORE_AD_TYPE_HPP
 # define CPPAD_CORE_AD_TYPE_HPP
-/* --------------------------------------------------------------------------
-CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-20 Bradley M. Bell
-
-CppAD is distributed under the terms of the
-             Eclipse Public License Version 2.0.
-
-This Source Code may also be made available under the following
-Secondary License when the conditions for such availability set forth
-in the Eclipse Public License, Version 2.0 are satisfied:
-      GNU General Public License, Version 2.0 or later.
----------------------------------------------------------------------------- */
+// SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-or-later
+// SPDX-FileCopyrightText: Bradley M. Bell <bradbell@seanet.com>
+// SPDX-FileContributor: 2003-24 Bradley M. Bell
+// ----------------------------------------------------------------------------
 
 # include <cppad/local/is_pod.hpp>
 
-namespace CppAD { // BEGIN_CPPAD_NAMESPACE
+# ifdef NDEBUG
+# define CPPAD_ASSERT_AD_TYPE(ad_obj)
+# else
+# define CPPAD_ASSERT_AD_TYPE(ad_obj)               \
+   switch(ad_obj.ad_type_)                          \
+   {  case constant_enum:                           \
+      CPPAD_ASSERT_UNKNOWN( ad_obj.tape_id_ == 0 ); \
+      break;                                        \
+                                                    \
+      case dynamic_enum:                            \
+      case variable_enum:                           \
+      break;                                        \
+                                                    \
+      default:                                      \
+      CPPAD_ASSERT_UNKNOWN(false);                  \
+   }                                                \
+   CPPAD_ASSERT_UNKNOWN(                            \
+      ad_obj.tape_id_ == 0 ||                       \
+      ad_obj.ad_type_ == dynamic_enum ||            \
+      ad_obj.ad_type_ == variable_enum              \
+   );
+# endif
+
+
+namespace CppAD {
+   // BEGIN TYPEDEF
+   typedef enum {
+      identical_zero_enum,      // identically zero
+      constant_enum,            // constant parameter
+      dynamic_enum,             // dynamic parameter
+      variable_enum,            // variable
+      number_ad_type_enum       // number of valid values for type_ad_enum
+   } ad_type_enum;
+   // END TYPEDEF
+
+   // BEGIN IS_POD
+   namespace local {
+      template <> inline bool
+      is_pod<ad_type_enum>(void) { return true; }
+   }
+   // END IS_POD
+}
+
+
 /*
-$begin ad_type_enum$$
-$spell
-    enum
-    typedef
-    CppAD
-    namespace
-$$
+{xrst_begin ad_type_enum dev}
+{xrst_spell
+   typedef
+}
 
-$section Type of AD an Object$$
+Type of AD an Object
+####################
 
-$head User API$$
-The values $code constant_enum$$, $code dynamic_enum$$ and
-$code variable_enum$$ are in the user API; see
-$cref/ad_type/atomic_three/ad_type/$$ for $code atomic_three$$ functions.
+typedef
+*******
+This typedef is in the ``CppAD`` namespace:
+{xrst_literal
+   // BEGIN TYPEDEF
+   // END TYPEDEF
+}
 
-$head typedef$$
-This typedef is in the $code CppAD$$ namespace:
-$srccode%hpp% */
-    typedef enum {
-        constant_enum,            // constant parameter
-        dynamic_enum,             // dynamic parameter
-        variable_enum,            // variable
-        number_ad_type_enum       // number of valid values for type_ad_enum
-    } ad_type_enum;
-/* %$$
+is_pod
+******
+The following informs :ref:`is_pod-name` that this is plain old data.
+{xrst_literal
+   // BEGIN IS_POD
+   // END IS_POD
+}
 
-$head is_pod$$
-The following informs $cref is_pod$$ that this is plain old data.
-$srccode%hpp% */
-    namespace local {
-        template <> inline bool
-        is_pod<ad_type_enum>(void) { return true; }
-    }
-/* %$$
-$end
+Atomic Function
+***************
+Only some of the values are valid for the user atomic function API; see
+:ref:`atomic_three<atomic_three_define@ad_type>` and
+:ref:`atomic_four<atomic_four_for_type@ad_type>` .
+
+ASSERT_AD_TYPE
+**************
+If *ad_obj* is an ``AD`` < *Base* > object, the syntax
+
+   ``CPPAD_ASSERT_AD_TYPE`` ( *ad_obj* )
+
+check that *ad_obj* satisfies the following conditions:
+
+#. *ad_obj* . ``ad_type_`` is one of the following:
+   ``constant_enum`` , ``dynamic_enum`` , ``variable_enum`` .
+#. *ad_obj* . ``ad_type_`` is ``constant_enum`` , then
+   *ad_obj* . ``tape_id_`` == 0 .
+
+{xrst_end ad_type_enum}
 */
 
-} // END_CPPAD_NAMESPACE
 
 
 # endif

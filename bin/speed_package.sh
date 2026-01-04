@@ -1,31 +1,24 @@
-# -----------------------------------------------------------------------------
-# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-20 Bradley M. Bell
-#
-# CppAD is distributed under the terms of the
-#              Eclipse Public License Version 2.0.
-#
-# This Source Code may also be made available under the following
-# Secondary License when the conditions for such availability set forth
-# in the Eclipse Public License, Version 2.0 are satisfied:
-#       GNU General Public License, Version 2.0 or later.
-# -----------------------------------------------------------------------------
+# SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-or-later
+# SPDX-FileCopyrightText: Bradley M. Bell <bradbell@seanet.com>
+# SPDX-FileContributor: 2003-22 Bradley M. Bell
+# ----------------------------------------------------------------------------
 if [ "$0" != 'bin/speed_package.sh' ]
 then
-    echo "bin/run_cmake.sh: must be executed from its parent directory"
-    exit 1
+   echo "bin/run_cmake.sh: must be executed from its parent directory"
+   exit 1
 fi
 # -----------------------------------------------------------------------------
 # bash function that echos and executes a command
 echo_eval() {
-    echo $*
-    eval $*
+   echo $*
+   eval $*
 }
 # -----------------------------------------------------------------------------
 #! /bin/bash -e
 git reset --hard
 package='cppadcg'
 include_file='cppad/cg/cg.hpp'
-home_page='https://github.com/joaoleal/CppADCodeGen.git'
+home_page='https://github.com/joaoleal/CppADCodeGen'
 # --------------------------------------------------------
 Package=`echo $package | sed -e 's|^.|\U&|'`
 PACKAGE=`echo $package | sed -e 's|^.*|\U&|'`
@@ -38,14 +31,14 @@ s|xpackage|$package|g
 EOF
 if [ -e speed/$package ]
 then
-    echo_eval rm -r speed/$package
+   echo_eval rm -r speed/$package
 fi
 cp -r speed/xpackage speed/$package
 git add speed/$package
 list=`ls speed/$package`
 for file in $list
 do
-    echo_eval sed -i speed/$package/$file -f speed_package.$$
+   echo_eval sed -i speed/$package/$file -f speed_package.$$
 done
 # --------------------------------------------------------
 # omh/speed_package.omh
@@ -67,14 +60,14 @@ cp speed/fadbad/speed_fadbad.omh $file
 git add $file
 echo_eval sed -i $file -f speed_package.$$
 # --------------------------------------------------------
-# speed/speed.omh
+# speed/speed.xrst
 cat << EOF > speed_package.$$
 s|\$cref/Fadbad/fadbad_prefix/Fadbad Home Page/\$\$,|&\\
 \$cref/$Package/${package}_prefix/$Package Home Page/\$\$,|
 s|^\\( *\\)speed/fadbad/speed_fadbad.omh%|&\\
 \\1speed/$package/speed_$package.omh%|
 s|\$spell|&\\
-    $Package|
+   $Package|
 EOF
 file='speed/speed.omh'
 echo_eval sed -i $file -f speed_package.$$
@@ -94,7 +87,7 @@ cat << EOF > speed_package.$$
 /ENDIF( *cppad_has_fadbad *)/! b end
 s|\$|\\
 IF( cppad_has_$package )\\
-    ADD_SUBDIRECTORY($package)\\
+   ADD_SUBDIRECTORY($package)\\
 ENDIF( cppad_has_$package )|
 : end
 EOF
@@ -103,11 +96,11 @@ echo_eval sed -i $file -f speed_package.$$
 # --------------------------------------------------------
 # CMakeLists.txt
 cat << EOF > speed_package.$$
-/optional_package(fadbad/! b end
+/prefix_info(fadbad/! b end
 s|\$|\\
 #\\
 # ${package}_prefix\\
-optional_package($package \${system_include} "$package install prefix")|
+prefix_info($package \${system_include} "$package install prefix")|
 : end
 EOF
 file='CMakeLists.txt'
@@ -116,13 +109,13 @@ echo_eval sed -i $file -f speed_package.$$
 # omh/install/package_prefix
 short_name=`echo $include_file | sed -e 's|.*/||'`
 cat << EOF > speed_package.$$
-s|http://www.fadbad.com|$home_page|
+s|http://uning.dk/|$home_page|
 s|%fadbad_prefix%/%dir%/FADBAD++/badiff.h|%${package}_prefix%/%dir%/$include_file|
 s|badiff[.]h|$short_name|
 s|Fadbad|$Package|g
 s|fadbad|$package|g
 s|\$spell|&\\
-    $include_file|
+   $include_file|
 EOF
 file="omh/install/${package}_prefix.omh"
 cp omh/install/fadbad_prefix.omh $file
@@ -131,18 +124,18 @@ echo_eval sed -i $file -f speed_package.$$
 # --------------------------------------------------------
 # omh/install/cmake.omh
 cat << EOF > speed_package.$$
-/^    -D fadbad_prefix=%fadbad_prefix%/! b one
+/^   -D fadbad_prefix=%fadbad_prefix%/! b one
 s|\$|\\
-    -D ${package}_prefix=%${package}_prefix% \\\\|
+   -D ${package}_prefix=%${package}_prefix% \\\\|
 b end
 #
 :one
 s|^\$rref fadbad_prefix\$\\\$|&\\
 \$rref ${package}_prefix\$\$|
-s|^    omh/install/fadbad_prefix.omh%|&\\
-    omh/install/${package}_prefix.omh%|
+s|^   omh/install/fadbad_prefix.omh%|&\\
+   xrst/install/${package}_prefix.omh%|
 s|\$spell|&\\
-    $package|
+   $package|
 #
 : end
 EOF
@@ -163,12 +156,12 @@ s|^\\( *\\)--no_fadbad)|\\1--no_$package)\\
 s|^package_list=''|&\\
 if [ "\$yes_$package" == 'yes' ]\\
 then\\
-    if [ ! -e "\$prefix/include/$include_file" ]\\
-    then\\
-        echo "Cannot find \$prefix/include/$include_file"\\
-        exit 1\\
-    fi\\
-    package_list="\$package_list $package"\\
+   if [ ! -e "\$prefix/include/$include_file" ]\\
+   then\\
+      echo "Cannot find \$prefix/include/$include_file"\\
+      exit 1\\
+   fi\\
+   package_list="\$package_list $package"\\
 fi|
 EOF
 file='bin/run_cmake.sh'

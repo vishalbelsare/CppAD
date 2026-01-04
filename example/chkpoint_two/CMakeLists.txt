@@ -1,23 +1,16 @@
-# -----------------------------------------------------------------------------
-# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
-#
-# CppAD is distributed under the terms of the
-#              Eclipse Public License Version 2.0.
-#
-# This Source Code may also be made available under the following
-# Secondary License when the conditions for such availability set forth
-# in the Eclipse Public License, Version 2.0 are satisfied:
-#       GNU General Public License, Version 2.0 or later.
-# -----------------------------------------------------------------------------
+# SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-or-later
+# SPDX-FileCopyrightText: Bradley M. Bell <bradbell@seanet.com>
+# SPDX-FileContributor: 2003-22 Bradley M. Bell
+# ----------------------------------------------------------------------------
 #
 # BEGIN_SORT_THIS_LINE_PLUS_2
 SET(source_list
-    base2ad.cpp
-    chkpoint_two.cpp
-    compare.cpp
-    dynamic.cpp
-    get_started.cpp
-    ode.cpp
+   base2ad.cpp
+   chkpoint_two.cpp
+   compare.cpp
+   dynamic.cpp
+   get_started.cpp
+   ode.cpp
 )
 # END_SORT_THIS_LINE_MINUS_2
 
@@ -25,13 +18,11 @@ set_compile_flags( example_chkpoint_two "${cppad_debug_which}" "${source_list}" 
 #
 ADD_EXECUTABLE(example_chkpoint_two EXCLUDE_FROM_ALL ${source_list})
 #
-# Add the check_example_chkpoint_two target
-ADD_CUSTOM_TARGET(check_example_chkpoint_two
-    example_chkpoint_two
-    DEPENDS example_chkpoint_two
+# List of libraries to be linked into the specified target
+TARGET_LINK_LIBRARIES(example_chkpoint_two
+   ${cppad_lib}
+   ${colpack_libs}
 )
-MESSAGE(STATUS "make check_example_chkpoint_two: available")
 #
-# add to check check_example_depends in parent environment
-add_to_list(check_example_depends check_example_chkpoint_two)
-SET(check_example_depends "${check_example_depends}" PARENT_SCOPE)
+# check_example_chkpoint_two
+add_check_executable(check_example chkpoint_two)

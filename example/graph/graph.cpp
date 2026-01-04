@@ -1,23 +1,37 @@
-/* --------------------------------------------------------------------------
-CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-21 Bradley M. Bell
+// SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-or-later
+// SPDX-FileCopyrightText: Bradley M. Bell <bradbell@seanet.com>
+// SPDX-FileContributor: 2003-22 Bradley M. Bell
+// ----------------------------------------------------------------------------
+/*
+{xrst_begin graph.cpp}
 
-CppAD is distributed under the terms of the
-             Eclipse Public License Version 2.0.
+graph Examples and Tests Driver
+###############################
 
-This Source Code may also be made available under the following
-Secondary License when the conditions for such availability set forth
-in the Eclipse Public License, Version 2.0 are satisfied:
-      GNU General Public License, Version 2.0 or later.
----------------------------------------------------------------------------- */
+Running These Tests
+*******************
+After executing the :ref:`cmake-name` command
+form the :ref:`download@Distribution Directory`,
+you can build and run these tests with the commands::
+
+   cd build
+   make check_example_graph
+
+Note that your choice of :ref:`cmake@generator` may require using
+an different version of make; e.g., ``ninja`` .
+
+{xrst_literal
+   // BEGIN C++
+   // END C++
+}
+
+{xrst_end graph.cpp}
+-------------------------------------------------------------------------------
+*/
+// BEGIN C++
 
 // CPPAD_HAS_* defines
 # include <cppad/configure.hpp>
-
-// system include files used for I/O
-# include <iostream>
-
-// C style asserts
-# include <cassert>
 
 // for thread_alloc
 # include <cppad/utility/thread_alloc.hpp>
@@ -28,6 +42,7 @@ in the Eclipse Public License, Version 2.0 are satisfied:
 // BEGIN_SORT_THIS_LINE_PLUS_2
 // external compiled tests
 extern bool add_op(void);
+extern bool atom4_op(void);
 extern bool atom_op(void);
 extern bool azmul_op(void);
 extern bool cexp_op(void);
@@ -46,35 +61,37 @@ extern bool unary_op(void);
 
 // main program that runs all the tests
 int main(void)
-{   std::string group = "example/graph";
-    size_t      width = 20;
-    CppAD::test_boolofvoid Run(group, width);
+{  std::string group = "example/graph";
+   size_t      width = 20;
+   CppAD::test_boolofvoid Run(group, width);
 
-    // This line is used by test_one.sh
+   // This line is used by test_one.sh
 
-    // BEGIN_SORT_THIS_LINE_PLUS_2
-    // external compiled tests
-    Run( add_op,               "add_op"          );
-    Run( atom_op,              "atom_op"         );
-    Run( azmul_op,             "azmul_op"        );
-    Run( cexp_op,              "cexp_op"         );
-    Run( comp_op,              "comp_op"         );
-    Run( div_op,               "div_op"          );
-    Run( discrete_op,          "discrete_op"     );
-    Run( mul_op,               "mul_op"          );
-    Run( pow_op,               "pow_op"          );
-    Run( print_graph,          "print_graph"     );
-    Run( print_op,             "print_op"        );
-    Run( sub_op,               "sub_op"          );
-    Run( sum_op,               "sum_op"          );
-    Run( switch_var_dyn,       "switch_var_dyn"  );
-    Run( unary_op,             "unary_op"        );
-    // END_SORT_THIS_LINE_MINUS_1
+   // BEGIN_SORT_THIS_LINE_PLUS_2
+   // external compiled tests
+   Run( add_op,               "add_op"          );
+   Run( atom4_op,             "atom4_op"        );
+   Run( atom_op,              "atom_op"         );
+   Run( azmul_op,             "azmul_op"        );
+   Run( cexp_op,              "cexp_op"         );
+   Run( comp_op,              "comp_op"         );
+   Run( discrete_op,          "discrete_op"     );
+   Run( div_op,               "div_op"          );
+   Run( mul_op,               "mul_op"          );
+   Run( pow_op,               "pow_op"          );
+   Run( print_graph,          "print_graph"     );
+   Run( print_op,             "print_op"        );
+   Run( sub_op,               "sub_op"          );
+   Run( sum_op,               "sum_op"          );
+   Run( switch_var_dyn,       "switch_var_dyn"  );
+   Run( unary_op,             "unary_op"        );
+   // END_SORT_THIS_LINE_MINUS_1
 
-    // check for memory leak
-    bool memory_ok = CppAD::thread_alloc::free_all();
-    // print summary at end
-    bool ok = Run.summary(memory_ok);
-    //
-    return static_cast<int>( ! ok );
+   // check for memory leak
+   bool memory_ok = CppAD::thread_alloc::free_all();
+   // print summary at end
+   bool ok = Run.summary(memory_ok);
+   //
+   return static_cast<int>( ! ok );
 }
+// END C++
